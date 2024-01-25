@@ -21,7 +21,6 @@ namespace FlappyBird
 
         private MediaPlayer _backgroundMusicPlayer = new MediaPlayer();
         private MediaPlayer _gameoverSoundPlayer = new MediaPlayer();
-        private MediaPlayer _scoreSoundPlayer = new MediaPlayer();
 
         // Constructor
         public MainWindow()
@@ -104,7 +103,6 @@ namespace FlappyBird
             {
                 Canvas.SetLeft(obstacle, 800);
                 _score += 0.5;
-                _scoreSoundPlayer.Play();
             }
         }
 
