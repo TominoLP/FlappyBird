@@ -36,6 +36,7 @@
                     <TextBlock Text="Game Over!!!" FontSize="24" Foreground="Black" />
                     <TextBlock x:Name="PopupScore" FontSize="18" Foreground="Black" />
                     <Button BorderThickness="0" Content="Restart" Click="RestartButton_Click"/>
+                    <Button Content="Quit" Click="QuitButton_Click" />
                 </StackPanel>
             </Grid>
         </Grid>
