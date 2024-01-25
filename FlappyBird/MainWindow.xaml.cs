@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Media;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -14,27 +15,75 @@ namespace FlappyBird
 {
     public partial class MainWindow : Window
     {
+        // Game-related variables
         DispatcherTimer gameTimer = new DispatcherTimer();
         double score;
         int gravity = 8;
         bool gameOver;
         Rect flappyBirdHitBox;
+        
+        MediaPlayer backgroundMusicPlayer = new MediaPlayer();
+        MediaPlayer gameoverSoundPlayer = new MediaPlayer();
+        MediaPlayer scoreSoundPlayer = new MediaPlayer();
 
+        // Constructor
         public MainWindow()
         {
             InitializeComponent();
             InitializeGame();
+            loadAudioFiles();
         }
 
+        private void loadAudioFiles()
+        {
+            
+            // Set the background music
+            Stream resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("FlappyBird.assets.sounds.background.mp3");
+            FileStream fileStream = new FileStream("background.mp3", FileMode.Create, FileAccess.Write);
+            resourceStream.CopyTo(fileStream);
+            backgroundMusicPlayer.Open(new Uri(fileStream.Name, UriKind.Relative));
+            backgroundMusicPlayer.Volume = 0.2;
+            backgroundMusicPlayer.Play();
+            
+            // Set the gameover sound
+            resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("FlappyBird.assets.sounds.gameover.mp3");
+            fileStream = new FileStream("gameover.mp3", FileMode.Create, FileAccess.Write);
+            resourceStream.CopyTo(fileStream);
+            gameoverSoundPlayer.Open(new Uri(fileStream.Name, UriKind.Relative));
+            gameoverSoundPlayer.Volume = 0.4;
+            
+            // Set the score sound
+            resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("FlappyBird.assets.sounds.score.mp3");
+            fileStream = new FileStream("score.mp3", FileMode.Create, FileAccess.Write);
+            resourceStream.CopyTo(fileStream);
+            scoreSoundPlayer.Open(new Uri(fileStream.Name, UriKind.Relative));
+            scoreSoundPlayer.Volume = 0.5;
+            scoreSoundPlayer.MediaFailed += ScoreSoundPlayer_MediaEnded;
+          
+            
+            
+        }
+
+        // clear score sound player after it has finished playing
+        private void ScoreSoundPlayer_MediaEnded(object sender, EventArgs e)
+        {
+            scoreSoundPlayer.Stop();
+        }
+        
+        // Initialize game components and start the game timer
         private void InitializeGame()
         {
             gameTimer.Tick += GameTimer_Tick;
             gameTimer.Interval = TimeSpan.FromMilliseconds(20);
             StartGame();
         }
+        
 
+        // Game timer tick event handling
         private void GameTimer_Tick(object sender, EventArgs e)
         {
+            
+  
             UpdateScore();
             UpdateFlappyBirdPosition();
             CheckCollisionWithBoundaries();
@@ -54,17 +103,23 @@ namespace FlappyBird
             }
         }
 
+        // Update and display the current score
         private void UpdateScore()
         {
+            
             txtScore.Content = "Score: " + score;
+            // if score is higher thatn before play score sound
+            
         }
 
+        // Update the position of the flappy bird
         private void UpdateFlappyBirdPosition()
         {
             flappyBirdHitBox = new Rect(Canvas.GetLeft(flappyBird), Canvas.GetTop(flappyBird), flappyBird.Width - 12, flappyBird.Height);
             Canvas.SetTop(flappyBird, Canvas.GetTop(flappyBird) + gravity);
         }
 
+        // Check for collisions with the boundaries of the game
         private void CheckCollisionWithBoundaries()
         {
             if (Canvas.GetTop(flappyBird) < -30 || Canvas.GetTop(flappyBird) + flappyBird.Height > 460)
@@ -73,22 +128,28 @@ namespace FlappyBird
             }
         }
 
+        // Check if the given image is an obstacle
         private bool IsObstacle(Image obstacle)
         {
-            return ((string)obstacle.Tag == "obs1" || (string)obstacle.Tag == "obs2" || (string)obstacle.Tag == "obs3");
+            return (string)obstacle.Tag == "obs1" || (string)obstacle.Tag == "obs2" || (string)obstacle.Tag == "obs3";
         }
 
+        // Update the position of the obstacle and handle scoring
         private void UpdateObstaclePosition(Image obstacle)
         {
+           
             Canvas.SetLeft(obstacle, Canvas.GetLeft(obstacle) - 5);
 
             if (Canvas.GetLeft(obstacle) < -100)
             {
                 Canvas.SetLeft(obstacle, 800);
                 score += 0.5;
+                scoreSoundPlayer.Play();
+       
             }
         }
 
+        // Check for collisions with obstacles
         private void CheckCollisionWithObstacle(Image obstacle)
         {
             Rect obstacleHitBox = new Rect(Canvas.GetLeft(obstacle), Canvas.GetTop(obstacle), obstacle.Width, obstacle.Height);
@@ -99,11 +160,13 @@ namespace FlappyBird
             }
         }
 
+        // Check if the given image is a cloud
         private bool IsCloud(Image cloud)
         {
             return ((string)cloud.Tag == "clouds");
         }
 
+        // Update the position of the cloud and handle scoring
         private void UpdateCloudPosition(Image cloud)
         {
             Canvas.SetLeft(cloud, Canvas.GetLeft(cloud) - 1);
@@ -112,9 +175,11 @@ namespace FlappyBird
             {
                 Canvas.SetLeft(cloud, 550);
                 score += 0.5;
+               
             }
         }
 
+        // Handle key press events for controlling the flappy bird
         private void KeyIsDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Space)
@@ -129,23 +194,32 @@ namespace FlappyBird
             }
         }
 
+        // Handle key release events for controlling the flappy bird
         private void KeyIsUp(object sender, KeyEventArgs e)
         {
             AdjustFlappyBirdRotation(5);
             gravity = 8;
         }
 
+        // Adjust the rotation of the flappy bird
         private void AdjustFlappyBirdRotation(double angle)
         {
             flappyBird.RenderTransform = new RotateTransform(angle, flappyBird.Width / 2, flappyBird.Height / 2);
         }
 
+        // Start the game
         private void StartGame()
         {
             MyCanvas.Focus();
+         
             InitializeGameObjects();
             gameTimer.Start();
             
+            // Play the background music
+            gameoverSoundPlayer.Stop();
+            backgroundMusicPlayer.Play();
+            
+
             // create a new highscore file if it doesn't exist
             if (!System.IO.File.Exists("highscore.txt"))
             {
@@ -153,6 +227,7 @@ namespace FlappyBird
             }
         }
 
+        // Initialize positions of game objects at the beginning of the game
         private void InitializeGameObjects()
         {
             int temp = 300;
@@ -173,7 +248,8 @@ namespace FlappyBird
                 }
             }
         }
-        
+
+        // Initialize the position of an obstacle based on its tag
         private void InitializeObstaclePosition(Image obstacle)
         {
             switch ((string)obstacle.Tag)
@@ -190,38 +266,48 @@ namespace FlappyBird
             }
         }
 
+        // Initialize the position of a cloud and update the temporary variable
         private void InitializeCloudPosition(Image cloud, ref int temp)
         {
             Canvas.SetLeft(cloud, 300 + temp);
             temp = 800;
         }
+
+        // Retrieve the high score from the highscore.txt file
         private double GetHighScore()
         {
-                 double highScore = 0;
-                string highScoreString = System.IO.File.ReadAllText("highscore.txt");
-    
-                if (highScoreString != "")
-                {
-                    highScore = Convert.ToDouble(highScoreString);
-                }
-    
-                return highScore;
+            double highScore = 0;
+            string highScoreString = System.IO.File.ReadAllText("highscore.txt");
+
+            if (highScoreString != "")
+            {
+                highScore = Convert.ToDouble(highScoreString);
+            }
+
+            return highScore;
         }
 
+        // End the game and display the game over screen
         private void EndGame()
         {
+            
+            gameoverSoundPlayer.Play();
+            backgroundMusicPlayer.Stop();
             gameTimer.Stop();
             gameOver = true;
 
             PopupScore.Text = $"Score: {score}\nHigh Score: {GetHighScore()}";
-            
+
             if (score > GetHighScore())
             {
                 System.IO.File.WriteAllText("highscore.txt", score.ToString());
             }
             GameOverGrid.Visibility = Visibility.Visible;
+   
+          
         }
 
+        // Handle the restart button click event
         private void RestartButton_Click(object sender, RoutedEventArgs e)
         {
             GameOverGrid.Visibility = Visibility.Collapsed;
