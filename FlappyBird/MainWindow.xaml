@@ -1,9 +1,9 @@
-﻿<Window x:Class="scool_FlappyBird.MainWindow"
+﻿<Window x:Class="FlappyBird.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:scool_FlappyBird"
+        xmlns:local="clr-namespace:FlappyBird"
         mc:Ignorable="d"
         Title="FlappyBird" Height="490" Width="525">
     <Canvas Name="MyCanvas" Focusable="True" KeyDown="KeyIsDown" KeyUp="KeyIsUp" Background="LightBlue">
@@ -27,6 +27,18 @@
 
         <!-- Score Label -->
         <Label Name="txtScore" FontSize="22" FontWeight="ExtraBold" Content="Score: 0" />
-        
+
+        <!-- Game Over Grid -->
+        <Grid x:Name="GameOverGrid" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center" Canvas.Top="200" Canvas.Left="200">
+            <Rectangle Fill="#ffffff" />
+            <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                <StackPanel>
+                    <TextBlock Text="Game Over!!!" FontSize="24" Foreground="Black" />
+                    <TextBlock x:Name="PopupScore" FontSize="18" Foreground="Black" />
+                    <Button BorderThickness="0" Content="Restart" Click="RestartButton_Click"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+
     </Canvas>
 </Window>

@@ -1,7 +1,7 @@
-﻿<Application x:Class="scool_FlappyBird.App"
+﻿<Application x:Class="FlappyBird.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:scool_FlappyBird"
+             xmlns:local="clr-namespace:FlappyBird"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
          
