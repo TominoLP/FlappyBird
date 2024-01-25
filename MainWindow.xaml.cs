@@ -24,5 +24,15 @@ namespace scool_FlappyBird
         {
             InitializeComponent();
         }
+
+        private void KeyIsDown(object sender, KeyEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void KeyIsUp(object sender, KeyEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
